@@ -1,16 +1,23 @@
 import { useState } from 'react';
 import { nanoid } from 'nanoid';
+import { useDispatch, useSelector } from 'react-redux';
+import { getContacts } from 'redux/selectors';
+import { addcontact } from 'redux/contactsSlice';
 
 
-export const Form = ({ onSubmit }) => {
-  const [name, setName] = useState('');
+export const Form = () => {
+
+    const contacts = useSelector(getContacts);
+    const dispatch = useDispatch();
+
+  const [contactName, setcontactName] = useState('');
   const [number, setNumber] = useState('');
 
   const hendleChange = event => {
     const { name, value } = event.currentTarget;
     switch (name) {
       case 'name':
-        setName(value);
+        setcontactName(value);
         break;
 
       case 'number':
@@ -24,9 +31,21 @@ export const Form = ({ onSubmit }) => {
 
   const hendleSubmit = event => {
     event.preventDefault();
-      const id = nanoid();
-    onSubmit({ name, number, id });
-    setName('');
+
+       if (contacts.some(({ name }) => name === contactName)) {
+         window.alert(`${contactName} is already in your contacts`);
+         return;
+       }
+    
+  dispatch(
+    addcontact({
+      name: contactName,
+      number,
+      id: nanoid(),
+    })
+  );
+
+    setcontactName('');
     setNumber('');
   };
 
@@ -37,7 +56,7 @@ export const Form = ({ onSubmit }) => {
         Name
         <input
           onChange={hendleChange}
-          value={name}
+          value={contactName}
           type="text"
           name="name"
           pattern="^[a-zA-Zа-яА-Я]+(([' \-][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
